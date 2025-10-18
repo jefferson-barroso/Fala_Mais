@@ -1,7 +1,7 @@
-package model;
+package com.example.fala.model;
 
-import enums.Categoria;
-import enums.Status;
+import com.example.fala.enums.Categoria;
+import com.example.fala.enums.Status;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
