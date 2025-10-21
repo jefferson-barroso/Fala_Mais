@@ -2,13 +2,15 @@ package com.example.fala.model;
 
 import com.example.fala.enums.Role;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 @Entity
 @Table(name = "usuarios")
-@Data
-@EqualsAndHashCode(of="idUsuario")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Usuario {
 
     @Id

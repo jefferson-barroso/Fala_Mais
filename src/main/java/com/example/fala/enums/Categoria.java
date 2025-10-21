@@ -1,4 +1,4 @@
-package enums;
+package com.example.fala.enums;
 
 public enum Categoria {
     ELOGIO,

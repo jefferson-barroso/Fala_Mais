@@ -10,6 +10,7 @@
 	</parent>
 	<groupId>com.example</groupId>
 	<artifactId>fala-mais</artifactId>
+
 	<version>0.0.1-SNAPSHOT</version>
 	<name>fala+</name>
 	<description>Fala+ Plataforma de feedback</description>
@@ -28,6 +29,9 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
 	</properties>
 	<dependencies>
 		<dependency>
@@ -63,6 +67,12 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -90,5 +100,6 @@
 			</plugin>
 		</plugins>
 	</build>
+
 
 </project>

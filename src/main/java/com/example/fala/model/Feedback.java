@@ -3,15 +3,17 @@ package com.example.fala.model;
 import com.example.fala.enums.Categoria;
 import com.example.fala.enums.Status;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "feedback")
-@Data
-@EqualsAndHashCode(of="idUsuario")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Feedback {
 
     @Id
