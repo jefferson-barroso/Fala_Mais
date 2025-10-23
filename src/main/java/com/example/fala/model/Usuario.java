@@ -20,6 +20,7 @@ public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long idUsuario;
 
     @Schema(description = "Nome completo", example = "Fulano de Tal")

@@ -2,23 +2,40 @@ package com.example.fala.controller;
 
 import com.example.fala.model.Usuario;
 import com.example.fala.repository.UsuarioRepository;
+import com.example.fala.dto.UsuarioRegistroDTO;
+import com.example.fala.dto.UsuarioResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/usuario")
+@RequiredArgsConstructor
 public class UsuarioController {
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private  UsuarioRepository usuarioRepository;
+    @Autowired
+    private  PasswordEncoder passwordEncoder;
+
+    private UsuarioResponseDTO toResponseDTO(Usuario usuario) {
+        UsuarioResponseDTO dto = new UsuarioResponseDTO();
+        dto.setIdUsuario(usuario.getIdUsuario());
+        dto.setNome(usuario.getNome());
+        dto.setEmail(usuario.getEmail());
+        dto.setRole(usuario.getRole());
+        return dto;
+    }
 
     @Operation(summary = "Cadastrar um novo usuário", description = "Cria um novo usuário no sistema.")
     @ApiResponses({
@@ -26,15 +43,25 @@ public class UsuarioController {
             @ApiResponse(responseCode = "400", description = "Dados inválidos")
     })
     @PostMapping("/cadastrarUsuario")
-    public ResponseEntity<Usuario> cadastrarUsuario(@RequestBody Usuario novoUsuario) {
+    public ResponseEntity<UsuarioResponseDTO> cadastrarUsuario(@RequestBody UsuarioRegistroDTO registroDTO) {
+
+        Usuario novoUsuario = new Usuario();
+        novoUsuario.setNome(registroDTO.getNome());
+        novoUsuario.setEmail(registroDTO.getEmail());
+        novoUsuario.setRole(registroDTO.getRole());
+        novoUsuario.setSenhaHash(passwordEncoder.encode(registroDTO.getSenha()));
+
         Usuario usuarioSalvo = usuarioRepository.save(novoUsuario);
-        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioSalvo);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponseDTO(usuarioSalvo));
     }
 
     @Operation(summary = "Listar todos os usuários", description = "Retorna todos os usuários cadastrados.")
     @GetMapping("/listarTodosUsuarios")
-    public List<Usuario> listarTodosUsuarios() {
-        return usuarioRepository.findAll();
+    public List<UsuarioResponseDTO> listarTodosUsuarios() {
+        return usuarioRepository.findAll().stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Operation(summary = "Buscar usuário por ID", description = "Retorna os dados de um usuário específico.")
@@ -43,19 +70,26 @@ public class UsuarioController {
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     })
     @GetMapping("/buscarUsuarioPorId/{id}")
-    public ResponseEntity<Usuario> buscarUsuarioPorId(@PathVariable Long id) {
+    public ResponseEntity<UsuarioResponseDTO> buscarUsuarioPorId(@PathVariable Long id) {
         return usuarioRepository.findById(id)
+                .map(this::toResponseDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Atualizar um usuário existente", description = "Atualiza os dados de um usuário pelo ID.")
     @PutMapping("/atualizarUsuario/{id}")
-    public ResponseEntity<Usuario> atualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuarioAtualizado) {
+    public ResponseEntity<UsuarioResponseDTO> atualizarUsuario(@PathVariable Long id, @RequestBody UsuarioRegistroDTO registroDTO) {
         return usuarioRepository.findById(id).map(usuarioExistente -> {
-            BeanUtils.copyProperties(usuarioAtualizado, usuarioExistente, "id");
+            usuarioExistente.setNome(registroDTO.getNome());
+            usuarioExistente.setEmail(registroDTO.getEmail());
+            usuarioExistente.setRole(registroDTO.getRole());
+            if (registroDTO.getSenha() != null && !registroDTO.getSenha().isEmpty()) {
+                usuarioExistente.setSenhaHash(passwordEncoder.encode(registroDTO.getSenha()));
+            }
+
             Usuario salvo = usuarioRepository.save(usuarioExistente);
-            return ResponseEntity.ok(salvo);
+            return ResponseEntity.ok(toResponseDTO(salvo));
         }).orElse(ResponseEntity.notFound().build());
     }
 
